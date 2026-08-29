@@ -104,16 +104,16 @@ export const HotspotDetailView = () => {
             </div>
             <div>
               <h3 className="text-headline-md font-bold text-primary text-base">
-                CivicLens AI Pattern Explanation &amp; Root Cause Analysis
+                CivicLens Pattern &amp; Root Cause Analysis
               </h3>
               <p className="text-xs text-on-surface-variant">
-                Synthesized across multi-source spatial reports, hydrology elevation models, and transit load telemetry.
+                Demo scenario built from preconfigured spatial reports and municipal operating context.
               </p>
             </div>
           </div>
 
           <span className="text-label-sm font-bold bg-primary text-white px-3 py-1 rounded-full shadow-sm">
-            98.0% Confidence Score
+            Demo confidence reference
           </span>
         </div>
 

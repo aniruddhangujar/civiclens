@@ -3,7 +3,7 @@ import { useCivicLens } from '../../context/CivicLensContext';
 import { DEMO_STEPS } from '../../data/seededData';
 
 export const DemoTourBar = () => {
-  const { currentDemoStep, jumpToDemoStep, resetDemoData, role, activeTab } = useCivicLens();
+  const { currentDemoStep, jumpToDemoStep, resetDemoData } = useCivicLens();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const currentStepInfo = DEMO_STEPS.find(s => s.step === currentDemoStep) || DEMO_STEPS[0];
@@ -20,6 +20,9 @@ export const DemoTourBar = () => {
               </span>
               <span>DEMO FLOW {currentDemoStep}/20</span>
             </div>
+            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md bg-success-green/15 text-success-green border border-success-green/30 shrink-0">
+              Local-safe
+            </span>
             <div className="text-left truncate">
               <div className="text-label-md font-bold text-on-surface flex items-center gap-1.5">
                 <span>{currentStepInfo.title}</span>
@@ -68,9 +71,9 @@ export const DemoTourBar = () => {
             <button
               onClick={() => resetDemoData()}
               className="px-2.5 py-1 text-label-sm font-medium rounded-lg text-critical-red hover:bg-error-container/40 border border-border-subtle"
-              title="Reset Demo Data to Initial State"
+              title="Reset this device's demo view without changing shared data"
             >
-              Reset
+              Reset view
             </button>
           </div>
         </div>

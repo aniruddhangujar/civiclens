@@ -7,6 +7,18 @@ export const AiImageScanner = ({
   scanResult,
   onRescan
 }) => {
+  const assessmentSource = scanResult?.isLiveAi
+    ? scanResult.source || 'Live vision model'
+    : scanResult?.source === 'demo-preset'
+      ? 'Preconfigured demo scenario'
+      : 'Deterministic fallback';
+
+  const assessmentLabel = scanResult?.isLiveAi
+    ? 'AI risk assessment: '
+    : scanResult?.source === 'demo-preset'
+      ? 'Demo scenario assessment: '
+      : 'Fallback assessment: ';
+
   return (
     <div className="relative bg-surface-container-lowest border border-border-subtle rounded-xl overflow-hidden shadow-sm">
       {/* Image Display with Overlay */}
@@ -92,7 +104,7 @@ export const AiImageScanner = ({
                 <span className="material-symbols-outlined text-xs text-primary">
                   {scanResult.isLiveAi ? 'cloud_done' : 'offline_pin'}
                 </span>
-                <span>{scanResult.isLiveAi ? 'Gemini 1.5 Flash' : 'Deterministic Model'}</span>
+                <span>{assessmentSource}</span>
               </span>
 
               <span className={`text-label-sm font-bold text-white px-2.5 py-1 rounded-full shadow-sm ${
@@ -132,7 +144,7 @@ export const AiImageScanner = ({
             <div className="bg-primary-fixed/30 border border-primary-fixed-dim rounded-lg p-3 text-xs text-on-surface text-left flex items-start space-x-2">
               <span className="material-symbols-outlined text-primary text-sm shrink-0 mt-0.5">psychology</span>
               <div>
-                <strong className="text-primary font-semibold">AI Risk Assessment: </strong>
+                <strong className="text-primary font-semibold">{assessmentLabel}</strong>
                 {scanResult.reasoning}
               </div>
             </div>

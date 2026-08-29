@@ -127,10 +127,10 @@ export const ResolutionVerificationModal = () => {
               <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
                 auto_awesome
               </span>
-              <span className="font-bold text-label-md text-on-surface">CivicLens AI Vision Repair Audit</span>
+              <span className="font-bold text-label-md text-on-surface">CivicLens Repair Evidence Review</span>
             </div>
             <span className="text-label-sm font-bold bg-success-green text-white px-2.5 py-0.5 rounded-full">
-              99.2% Quality Compliance
+              Demo review criteria
             </span>
           </div>
 
@@ -138,19 +138,19 @@ export const ResolutionVerificationModal = () => {
             <div className="bg-surface-container-lowest p-2.5 rounded-lg border border-border-subtle">
               <span className="text-on-surface-variant block text-[10px] uppercase font-bold">Void Leveling:</span>
               <span className="font-bold text-success-green flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs">check</span> 100% Filled &amp; Rolled
+                <span className="material-symbols-outlined text-xs">check</span> Evidence supplied
               </span>
             </div>
             <div className="bg-surface-container-lowest p-2.5 rounded-lg border border-border-subtle">
               <span className="text-on-surface-variant block text-[10px] uppercase font-bold">Hydraulic Seal:</span>
               <span className="font-bold text-success-green flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs">check</span> Zero Surface Seepage
+                <span className="material-symbols-outlined text-xs">check</span> Visual check required
               </span>
             </div>
             <div className="bg-surface-container-lowest p-2.5 rounded-lg border border-border-subtle">
               <span className="text-on-surface-variant block text-[10px] uppercase font-bold">Lane Clearance:</span>
               <span className="font-bold text-success-green flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs">check</span> Bus Route 14 Clear
+                <span className="material-symbols-outlined text-xs">check</span> Field confirmation required
               </span>
             </div>
           </div>

@@ -12,10 +12,11 @@ export const ReportWizard = () => {
     submitCitizenReport,
     navigateTab,
     switchRole,
-    jumpToDemoStep
+    hotspots
   } = useCivicLens();
 
   const [dragOver, setDragOver] = useState(false);
+  const targetHotspot = hotspots.find(hotspot => hotspot.id === wizardState.selectedPreset.targetHotspotId);
 
   const handleSelectPreset = (preset) => {
     setWizardState(prev => ({
@@ -275,7 +276,7 @@ export const ReportWizard = () => {
                     Target Hotspot: {wizardState.selectedPreset.targetHotspotId}
                   </div>
                   <div className="text-xs text-on-surface-variant">
-                    Spatial AI will cluster this report into the Elm St Hydraulic Erosion Hotspot.
+                    CivicLens will apply deterministic spatial grouping to {targetHotspot?.title || 'a new municipal hotspot'}.
                   </div>
                 </div>
               </div>
@@ -323,7 +324,7 @@ export const ReportWizard = () => {
                 Ticket #{wizardState.submittedReportId} Created
               </h2>
               <p className="text-body-md text-on-surface-variant max-w-md mx-auto mt-1">
-                Your report has been analyzed by CivicLens AI and grouped into municipal infrastructure cluster <strong>Hotspot #HS-402</strong>.
+                Your report has been classified and grouped using CivicLens civic routing rules into <strong>{targetHotspot ? `Hotspot #${targetHotspot.id}` : 'a new municipal hotspot'}</strong>.
               </p>
             </div>
 
@@ -335,7 +336,7 @@ export const ReportWizard = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">Hotspot Severity Index:</span>
-                <span className="font-bold text-critical-red">94/100 (Critical)</span>
+                <span className="font-bold text-critical-red">{targetHotspot ? `${targetHotspot.severityScore}/100 (${targetHotspot.severity})` : 'Calculated on submission'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">Estimated Municipal SLA:</span>

@@ -15,8 +15,7 @@ import {
   subscribeToHotspots,
   syncReportToFirestore,
   syncHotspotToFirestore,
-  seedFirestoreCollectionsIfEmpty,
-  resetFirestoreCollections
+  seedFirestoreCollectionsIfEmpty
 } from '../services/firestoreService';
 
 const CivicLensContext = createContext(null);
@@ -218,7 +217,7 @@ export const CivicLensProvider = ({ children }) => {
     }));
   };
 
-  const submitCitizenReport = (mergeWithExisting = false) => {
+  const submitCitizenReport = ({ persist = true } = {}) => {
     const preset = wizardState.selectedPreset;
     const analysis = wizardState.scanResult || preset.aiAnalysis;
     const reportId = `CL-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -252,7 +251,7 @@ export const CivicLensProvider = ({ children }) => {
 
     // Update local state and Firestore
     setReports(prev => [newReport, ...prev]);
-    syncReportToFirestore(newReport);
+    if (persist) syncReportToFirestore(newReport);
 
     setHotspots(prev => {
       return prev.map(hs => {
@@ -273,7 +272,7 @@ export const CivicLensProvider = ({ children }) => {
               ...hs.activityLog
             ]
           };
-          syncHotspotToFirestore(updatedHotspot);
+          if (persist) syncHotspotToFirestore(updatedHotspot);
           return updatedHotspot;
         }
         return hs;
@@ -295,7 +294,7 @@ export const CivicLensProvider = ({ children }) => {
     );
   };
 
-  const approveActionPlan = (hotspotId, assignedCrewId = "CREW-03") => {
+  const approveActionPlan = (hotspotId, assignedCrewId = "CREW-03", { persist = true } = {}) => {
     const assignedCrew = crews.find(c => c.id === assignedCrewId) || crews[0];
 
     setHotspots(prev => prev.map(hs => {
@@ -312,7 +311,7 @@ export const CivicLensProvider = ({ children }) => {
             ...hs.activityLog
           ]
         };
-        syncHotspotToFirestore(updated);
+        if (persist) syncHotspotToFirestore(updated);
         return updated;
       }
       return hs;
@@ -333,7 +332,7 @@ export const CivicLensProvider = ({ children }) => {
             }
           ]
         };
-        syncReportToFirestore(updated);
+        if (persist) syncReportToFirestore(updated);
         return updated;
       }
       return r;
@@ -355,7 +354,7 @@ export const CivicLensProvider = ({ children }) => {
     );
   };
 
-  const advanceHotspotLifecycle = (hotspotId, nextStatus) => {
+  const advanceHotspotLifecycle = (hotspotId, nextStatus, { persist = true } = {}) => {
     setHotspots(prev => prev.map(hs => {
       if (hs.id === hotspotId) {
         const updated = {
@@ -370,7 +369,7 @@ export const CivicLensProvider = ({ children }) => {
             ...hs.activityLog
           ]
         };
-        syncHotspotToFirestore(updated);
+        if (persist) syncHotspotToFirestore(updated);
         return updated;
       }
       return hs;
@@ -393,7 +392,7 @@ export const CivicLensProvider = ({ children }) => {
             }
           ]
         };
-        syncReportToFirestore(updated);
+        if (persist) syncReportToFirestore(updated);
         return updated;
       }
       return r;
@@ -421,7 +420,7 @@ export const CivicLensProvider = ({ children }) => {
     setCurrentDemoStep(18);
   };
 
-  const verifyResolution = (reportId, userNotes = "") => {
+  const verifyResolution = (reportId, userNotes = "", { persist = true } = {}) => {
     try {
       confetti({
         particleCount: 100,
@@ -447,7 +446,7 @@ export const CivicLensProvider = ({ children }) => {
             }
           ]
         };
-        syncReportToFirestore(updated);
+        if (persist) syncReportToFirestore(updated);
         return updated;
       }
       return r;
@@ -468,7 +467,7 @@ export const CivicLensProvider = ({ children }) => {
               ...hs.activityLog
             ]
           };
-          syncHotspotToFirestore(updated);
+          if (persist) syncHotspotToFirestore(updated);
           return updated;
         }
         return hs;
@@ -503,11 +502,6 @@ export const CivicLensProvider = ({ children }) => {
     setRole('citizen');
     setActiveTab('home');
 
-    // Also reset Firestore if active
-    if (isFirebaseConfigured) {
-      resetFirestoreCollections(INITIAL_REPORTS, INITIAL_HOTSPOTS);
-    }
-
     setWizardState({
       step: 1,
       selectedPreset: AI_SCAN_PRESETS[0],
@@ -522,7 +516,7 @@ export const CivicLensProvider = ({ children }) => {
       submittedReportId: null
     });
 
-    addNotification("Demo Reset Complete", "All municipal data reset to pristine demo baseline.", "info");
+    addNotification("Demo View Reset", "The local demo view was reset. Shared Firestore data was left unchanged.", "info");
   };
 
   const jumpToDemoStep = (stepNumber) => {
@@ -543,11 +537,18 @@ export const CivicLensProvider = ({ children }) => {
       } else if (stepNumber === 4) {
         setWizardState(prev => ({ ...prev, step: 1, uploadedImage: AI_SCAN_PRESETS[0].imageUrl }));
       } else if (stepNumber === 5) {
-        triggerAiScan(AI_SCAN_PRESETS[0]);
+        setWizardState(prev => ({
+          ...prev,
+          step: 3,
+          isScanning: false,
+          scanProgress: 100,
+          scanResult: { ...AI_SCAN_PRESETS[0].aiAnalysis, isLiveAi: false, source: 'demo-preset' },
+          similarReports: reports.filter(r => r.hotspotId === 'HS-402')
+        }));
       } else if (stepNumber === 6) {
         setWizardState(prev => ({ ...prev, step: 3, scanResult: AI_SCAN_PRESETS[0].aiAnalysis, similarReports: reports.filter(r => r.hotspotId === 'HS-402') }));
       } else if (stepNumber === 7) {
-        submitCitizenReport();
+        submitCitizenReport({ persist: false });
       }
     } else if (stepNumber === 8 || stepNumber === 9 || stepNumber === 10) {
       navigateTab('hotspots');
@@ -555,12 +556,12 @@ export const CivicLensProvider = ({ children }) => {
       setSelectedHotspotId('HS-402');
       navigateTab('hotspot-detail', { hotspotId: 'HS-402' });
       if (stepNumber === 14 || stepNumber === 15) {
-        approveActionPlan('HS-402', 'CREW-03');
+        approveActionPlan('HS-402', 'CREW-03', { persist: false });
       } else if (stepNumber === 16) {
-        advanceHotspotLifecycle('HS-402', 'In Progress');
+        advanceHotspotLifecycle('HS-402', 'In Progress', { persist: false });
       }
     } else if (stepNumber === 17) {
-      advanceHotspotLifecycle('HS-402', 'Resolved');
+      advanceHotspotLifecycle('HS-402', 'Resolved', { persist: false });
       setRole('citizen');
       navigateTab('dashboard');
     } else if (stepNumber === 18 || stepNumber === 19) {
@@ -568,7 +569,7 @@ export const CivicLensProvider = ({ children }) => {
       openVerificationModal(rep);
     } else if (stepNumber === 20) {
       const rep = reports.find(r => r.id === 'CL-8821') || reports[0];
-      verifyResolution(rep.id);
+      verifyResolution(rep.id, '', { persist: false });
       setRole('citizen');
       navigateTab('dashboard');
     }

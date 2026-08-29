@@ -370,9 +370,9 @@ export const DEMO_STEPS = [
   { step: 4, title: "4. Upload Photo", role: "citizen", tab: "report", desc: "Citizen selects or snaps photo of Elm St road collapse & water leak." },
   { step: 5, title: "5. AI Vision Analysis", role: "citizen", tab: "report", desc: "CivicLens AI computer vision scans defect, detects bounding box & 98.4% severity." },
   { step: 6, title: "6. Similar Reports Detected", role: "citizen", tab: "report", desc: "AI detects nearby matching reports within 150m and suggests cluster merge." },
-  { step: 7, title: "7. Citizen Submits Report", role: "citizen", tab: "report", desc: "Report #CL-9402 is submitted and confirmation token generated." },
+  { step: 7, title: "7. Citizen Submits Report", role: "citizen", tab: "report", desc: "A confirmation ticket is created and routed into the selected hotspot." },
   { step: 8, title: "8. Hotspot Clustering Engine", role: "system", tab: "hotspots", desc: "Spatial engine clusters new report into Hotspot #HS-402." },
-  { step: 9, title: "9. Severity & Confidence Calc", role: "system", tab: "hotspots", desc: "Hotspot Severity Index calculates at 94/100 (Critical) with 98% confidence." },
+  { step: 9, title: "9. Severity & Confidence Calc", role: "system", tab: "hotspots", desc: "Deterministic hotspot rules update severity from the clustered reports." },
   { step: 10, title: "10. Operator Opens Hotspots", role: "operator", tab: "hotspots", desc: "Municipal operator views telemetry command center and priority queue." },
   { step: 11, title: "11. Open Hotspot Deep Dive", role: "operator", tab: "hotspot-detail", desc: "Operator opens Hotspot #HS-402 for spatial investigation." },
   { step: 12, title: "12. AI Pattern Explanation", role: "operator", tab: "hotspot-detail", desc: "AI Root Cause analysis explains subsurface water pipe washout." },
@@ -382,6 +382,6 @@ export const DEMO_STEPS = [
   { step: 16, title: "16. Lifecycle Progression", role: "operator", tab: "hotspot-detail", desc: "Crew advances status: Assigned -> In Progress -> Resolved with repair proof." },
   { step: 17, title: "17. Citizen Receives Resolution", role: "citizen", tab: "dashboard", desc: "Citizen receives push notification that Elm St repair is ready for audit." },
   { step: 18, title: "18. Before & After Evidence", role: "citizen", tab: "verify", desc: "Citizen compares interactive before/after visual diff slider." },
-  { step: 19, title: "19. AI Verification Audit", role: "citizen", tab: "verify", desc: "CivicLens AI verifies smooth asphalt index (99.2% compliance)." },
+  { step: 19, title: "19. Repair Verification Review", role: "citizen", tab: "verify", desc: "Citizen compares before-and-after evidence and records a verification decision." },
   { step: 20, title: "20. Issue Marked VERIFIED", role: "citizen", tab: "dashboard", desc: "Citizen clicks Verify. Ticket is stamped VERIFIED and +50 Karma awarded!" }
 ];

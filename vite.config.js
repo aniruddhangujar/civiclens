@@ -32,6 +32,19 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       host: true
+    },
+    build: {
+      // Firebase is intentionally isolated in its own cached vendor chunk (~556 kB minified).
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            firebase: ['firebase/app', 'firebase/firestore'],
+            react: ['react', 'react-dom', 'react-dom/client'],
+            effects: ['canvas-confetti']
+          }
+        }
+      }
     }
   };
 });

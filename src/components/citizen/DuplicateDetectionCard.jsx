@@ -19,13 +19,13 @@ export const DuplicateDetectionCard = ({
               Similar Citizen Reports Detected Nearby
             </h3>
             <p className="text-body-md text-xs text-on-surface-variant">
-              CivicLens spatial proximity engine found {similarReports.length} related reports within 150m.
+              CivicLens deterministic proximity rules found {similarReports.length} related reports in the selected demo area.
             </p>
           </div>
         </div>
 
         <span className="text-label-sm font-bold bg-high-warning-orange/15 text-tertiary-container px-2.5 py-1 rounded-full">
-          Cluster #HS-402
+          Deterministic match
         </span>
       </div>
 
@@ -46,7 +46,7 @@ export const DuplicateDetectionCard = ({
                 <div className="flex items-center space-x-2">
                   <span className="text-[11px] font-bold text-primary">#{report.id}</span>
                   <span className="text-[10px] bg-primary-fixed text-on-primary-fixed px-1.5 py-0.2 rounded font-semibold">
-                    94% Match
+                    Demo match
                   </span>
                   <span className="text-[10px] text-on-surface-variant">
                     {new Date(report.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -73,7 +73,7 @@ export const DuplicateDetectionCard = ({
       {/* Action Options */}
       <div className="pt-2 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="text-xs text-on-surface-variant">
-          Attaching your photo directly boosts the <strong>Hotspot Severity Index</strong> and expedites municipal dispatch.
+          Your confirmation is stored as a separate report and deterministically grouped into the selected hotspot.
         </div>
 
         <div className="flex items-center space-x-2 w-full sm:w-auto">

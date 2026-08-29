@@ -56,10 +56,11 @@ export async function analyzeInfrastructurePhoto(imageSrc, fallbackPreset, categ
       if (response.ok) {
         const result = await response.json();
         if (result.ok && result.data) {
+          const source = result.data.source || 'live-vision-model';
           return {
             ...result.data,
             isLiveAi: true,
-            source: 'gemini-1.5-flash',
+            source,
             // Preserve bounding boxes from preset or generate normalized HUD coordinates
             boundingBoxes: fallbackPreset?.aiAnalysis?.boundingBoxes || [
               { label: result.data.defectType, top: "35%", left: "30%", width: "40%", height: "35%", color: result.data.severity === 'Critical' ? '#da1e28' : '#ff832b' }
