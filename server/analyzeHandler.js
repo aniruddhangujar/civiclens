@@ -1,6 +1,7 @@
 /**
  * Server-side handler for CivicLens Image Analysis
  * Supports configurable AI providers: 'auto' | 'openrouter' | 'gemini'
+ * Dual-compatible with standard Node.js HTTP servers and Vercel Serverless Functions.
  * Keeps API keys strictly on the server; never exposed to the client.
  */
 
@@ -12,44 +13,45 @@ export async function handleAnalyzeImage(req, res, serverConfig = {}) {
   const openRouterModel = serverConfig.openRouterModel || process.env.OPENROUTER_MODEL || 'google/gemini-2.5-flash';
   const geminiModel = serverConfig.geminiModel || process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 
+  // Helper to send JSON response across Node HTTP and Vercel Serverless Function runtimes
+  const sendJsonResponse = (statusCode, payload) => {
+    if (typeof res.status === 'function') {
+      res.status(statusCode).json(payload);
+    } else {
+      res.statusCode = statusCode;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(payload));
+    }
+  };
+
   // Only accept POST
   if (req.method !== 'POST') {
-    res.statusCode = 405;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ ok: false, error: 'Method Not Allowed' }));
+    sendJsonResponse(405, { ok: false, error: 'Method Not Allowed' });
     return;
   }
 
-  let bodyStr = '';
-  req.on('data', chunk => {
-    bodyStr += chunk;
-  });
-
-  req.on('end', async () => {
+  // Parse body from stream or pre-parsed object
+  const processPayload = async (body) => {
     try {
-      const { imageBase64, mimeType = 'image/jpeg', categoryHint } = JSON.parse(bodyStr || '{}');
+      const { imageBase64, mimeType = 'image/jpeg', categoryHint } = body || {};
 
       // 1. If no API keys are available, return fallback directive cleanly
       const hasOpenRouter = Boolean(openRouterKey && openRouterKey !== 'YOUR_OPENROUTER_API_KEY');
       const hasGemini = Boolean(geminiKey && geminiKey !== 'YOUR_GEMINI_API_KEY');
 
       if (!hasOpenRouter && !hasGemini) {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
+        sendJsonResponse(200, {
           ok: false,
           fallback: true,
           reason: 'NO_API_KEY',
           message: 'No AI API keys configured on server. Activating deterministic local fallback.'
-        }));
+        });
         return;
       }
 
       // 2. Validate image payload
       if (!imageBase64) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ ok: false, error: 'Missing imageBase64 in request body' }));
+        sendJsonResponse(400, { ok: false, error: 'Missing imageBase64 in request body' });
         return;
       }
 
@@ -90,7 +92,7 @@ Do NOT return Markdown backticks. Return valid JSON only.`;
             headers: {
               'Authorization': `Bearer ${openRouterKey}`,
               'Content-Type': 'application/json',
-              'HTTP-Referer': 'http://localhost:5173',
+              'HTTP-Referer': 'https://civiclens.vercel.app',
               'X-Title': 'CivicLens'
             },
             signal: controller.signal,
@@ -179,14 +181,12 @@ Do NOT return Markdown backticks. Return valid JSON only.`;
 
       // If live AI failed or was not configured, trigger deterministic fallback
       if (!parsedData) {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
+        sendJsonResponse(200, {
           ok: false,
           fallback: true,
           reason: 'API_ERROR',
           message: 'Live AI model returned no content. Activating deterministic local fallback.'
-        }));
+        });
         return;
       }
 
@@ -206,23 +206,40 @@ Do NOT return Markdown backticks. Return valid JSON only.`;
         source: parsedData.source || 'live-vision-model'
       };
 
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({
+      sendJsonResponse(200, {
         ok: true,
         data: sanitizedData
-      }));
+      });
 
     } catch (err) {
       console.warn('[CivicLens Server] Error processing image analysis:', err.message);
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({
+      sendJsonResponse(200, {
         ok: false,
         fallback: true,
         reason: 'EXCEPTION',
         message: err.message || 'Server exception during image analysis. Falling back to local model.'
-      }));
+      });
+    }
+  };
+
+  // If req.body is already an object (e.g. Vercel Serverless Function)
+  if (req.body && typeof req.body === 'object') {
+    await processPayload(req.body);
+    return;
+  }
+
+  // If req is a readable stream (e.g. Node standard http)
+  let bodyStr = '';
+  req.on('data', chunk => {
+    bodyStr += chunk;
+  });
+
+  req.on('end', async () => {
+    try {
+      const parsedBody = JSON.parse(bodyStr || '{}');
+      await processPayload(parsedBody);
+    } catch (e) {
+      await processPayload({});
     }
   });
 }
