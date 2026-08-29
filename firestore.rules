@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // CivicLens Hackathon / Demo Mode Security Rules
+    // =========================================================================
+    // LIMITATION NOTICE:
+    // This application currently runs in Hackathon Demo Mode without Firebase Auth.
+    // The Citizen / Operator UI switcher is a front-end simulation for demonstration
+    // and is NOT a security boundary.
+    //
+    // The rules below enforce basic payload schema integrity to prevent malformed
+    // data injection, while keeping read/write open for judge evaluation without
+    // authentication barriers.
+    //
+    // PRODUCTION UPGRADE PATH:
+    // In production, integrate Firebase Authentication with Custom Claims:
+    //   - Citizens: allow create: if request.auth != null;
+    //   - Operators: allow update, delete: if request.auth.token.role == 'operator';
+    // =========================================================================
+
+    // Helper: validate basic report document schema
+    function isValidReportDoc() {
+      return request.resource.data.keys().hasAll(['id', 'category', 'status', 'submittedAt']) &&
+             request.resource.data.status in ['Detected', 'Assigned', 'In Progress', 'Resolved', 'Verified'];
+    }
+
+    // Helper: validate basic hotspot document schema
+    function isValidHotspotDoc() {
+      return request.resource.data.keys().hasAll(['id', 'severityScore', 'status']) &&
+             request.resource.data.status in ['Detected', 'Assigned', 'In Progress', 'Resolved', 'Verified'];
+    }
+
+    // 1. Citizen Reports Collection
+    match /civiclens_reports/{reportId} {
+      allow read: if true;
+      allow create, update: if isValidReportDoc();
+      allow delete: if false; // Disallow document deletion in demo mode
+    }
+
+    // 2. Municipal Hotspots Collection
+    match /civiclens_hotspots/{hotspotId} {
+      allow read: if true;
+      allow create, update: if isValidHotspotDoc();
+      allow delete: if false; // Disallow document deletion in demo mode
+    }
+
+    // Default deny for all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
